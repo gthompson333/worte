@@ -5,9 +5,9 @@ enum NameValidationError { empty, tooShort }
 
 class NameFormField extends FormzInput<String, NameValidationError>
     with EquatableMixin {
-  const NameFormField.unvalidated([String value = '']) : super.pure(value);
+  const NameFormField.unvalidated([super.value = '']) : super.pure();
 
-  const NameFormField.validated([String value = '']) : super.dirty(value);
+  const NameFormField.validated([super.value = '']) : super.dirty();
 
   @override
   NameValidationError? validator(String value) {
