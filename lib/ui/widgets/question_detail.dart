@@ -22,13 +22,13 @@ class QuestionDetail extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          question.topic.toUpperCase(),
+          "[No topic provided.]",
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.labelSmall,
         ),
         const SizedBox(height: 4),
         Text(
-          question.description,
+          question.word,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
@@ -40,7 +40,7 @@ class QuestionDetail extends StatelessWidget {
           crossAxisCount: 2,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          children: question.answers.entries
+          children: question.translations.entries
               .map(
                 (entry) => OutlinedButton(
                   onPressed: () => onAnswerSelected.call(question, entry.key),

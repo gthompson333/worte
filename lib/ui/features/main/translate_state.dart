@@ -1,4 +1,4 @@
-part of 'translate_word_bloc.dart';
+part of 'translate_bloc.dart';
 
 abstract class TranslateState extends Equatable {
   const TranslateState();

@@ -3,17 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:worter/data/openai/models.dart';
 import 'package:worter/data/openai/services.dart';
 
-part 'translate_word_event.dart';
-part 'translate_word_state.dart';
+part 'translate_event.dart';
+part 'translate_state.dart';
 
-class TranslateWordBloc extends Bloc<TranslateWordEvent, TranslateState> {
+class TranslateWordBloc extends Bloc<TranslateEvent, TranslateState> {
   TranslateWordBloc() : super(TranslateWordLoading()) {
-    on<FetchWordEvent>(_onWordFetched);
-    on<FetchHintEvent>(_onHintFetched);
+    on<GetWordEvent>(_onGetWord);
+    on<GetHintEvent>(_onGetHint);
   }
 
-  Future<void> _onWordFetched(
-    FetchWordEvent event,
+  Future<void> _onGetWord(
+    GetWordEvent event,
     Emitter<TranslateState> emit,
   ) async {
     final state = this.state;
@@ -28,8 +28,8 @@ class TranslateWordBloc extends Bloc<TranslateWordEvent, TranslateState> {
     }
   }
 
-  Future<void> _onHintFetched(
-    FetchHintEvent event,
+  Future<void> _onGetHint(
+    GetHintEvent event,
     Emitter<TranslateState> emit,
   ) async {
     final state = this.state;

@@ -53,7 +53,7 @@ class _MainScreenState extends State<MainScreen> {
       fetchHintStatus = OperationStatus.idle;
     });
     Data.instance
-        .generateTriviaQuestion()
+        .generateWord()
         .then(
           (question) => setState(() {
             currentQuestion = question;
@@ -84,8 +84,8 @@ class _MainScreenState extends State<MainScreen> {
     if (isGameOver) {
       return GameOver(
         score: points,
-        correctAnswer: currentQuestion!.correctAnswer.key,
-        funFact: currentQuestion!.funFact,
+        correctAnswer: currentQuestion!.correctWord.key,
+        funFact: "[No fact provided.]",
         onTryAgainPressed: () {
           resetGame();
         },
@@ -126,7 +126,7 @@ class _MainScreenState extends State<MainScreen> {
             QuestionDetail(
               question: currentQuestion!,
               onAnswerSelected: (question, answerKey) {
-                if (question.answers[answerKey] ?? false) {
+                if (question.translations[answerKey] ?? false) {
                   setState(() {
                     ++points;
                   });
@@ -204,7 +204,7 @@ class _MainScreenState extends State<MainScreen> {
       children: [
         const SizedBox(height: 24),
         Text(
-          hint!.content,
+          hint!.hint,
           textAlign: TextAlign.center,
         ),
       ],
