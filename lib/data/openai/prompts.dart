@@ -1,21 +1,21 @@
 const initialInstructionsPrompt = '''
   You are a teacher of the German language.
 
-  You will provide a German word for translating to English and provide a translation hint.
+  You will provide a word in the German language for translating to English and provide a translation hint.
 ''';
 
-const generateQuestionPrompt = '''
-  Your task is to generate a german word.
+const generateWordPrompt = '''
+  Your task is to generate a word in the German language.
 
-  Generate a German word appropriate for a non-native speaker of the German language.
+  Generate a random word appropriate for a non-native speaker of the German language.
   
-  Do not generate a word that has been generated previously.
+  The same word should not be generated more than once.
 
   Answer using only JSON without formatting and this template:
-  { "action": "generate_question", "question": "<random question>", "difficulty": "<question difficulty>", "topic": "<question topic>", "answers": {"<answer>": <true if correct, else false>, "<answer>": <true if correct, else false>, "<answer>": <true if correct, else false>, "<answer>": <true if correct, else false>}, funFact: "<interesting fun fact about the correct answer with a pun>" }
+  {"action": "generate_word", "word": "<word>", "translations": {"<translation>": <true if correct, else false>, "<translation>": <true if correct, else false>, "<translation>": <true if correct, else false>, "<translation": <true if correct, else false>}"}
 ''';
 
-String requestHintPrompt(String question) => '''
+String requestHintPrompt(String word) => '''
   Your task is to give a hint without giving away the German word.
 
   To solve this do the following:
@@ -24,8 +24,8 @@ String requestHintPrompt(String question) => '''
 
   Don't decide the hint until you have translated to English the word yourself.
 
-  The word is: ```$question```
+  The word is: ```$word```
 
   Your output should only be JSON without formatting and follow this template:
-  { "action": "player_hint", "hint": "<the hint generated>" }
+  {"action": "generate_hint", "hint": "<hint>"}
 ''';

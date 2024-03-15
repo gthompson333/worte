@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'name_formfield.dart';
+import '../../widgets/name_formfield.dart';
 
 part 'signin_state.dart';
 

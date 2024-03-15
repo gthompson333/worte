@@ -1,5 +1,5 @@
 import 'package:dart_openai/dart_openai.dart';
-import 'models.dart';
+import 'models.dart' as models;
 import 'prompts.dart';
 
 class Data {
@@ -28,13 +28,13 @@ class Data {
         temperature: 0.8,
       );
 
-  Future<Question> generateTriviaQuestion() async {
+  Future<models.Word> generateWord() async {
     _messages = <OpenAIChatCompletionChoiceMessageModel>[
       ..._initialMessages,
       OpenAIChatCompletionChoiceMessageModel(
         content: [
           OpenAIChatCompletionChoiceMessageContentItemModel.text(
-              generateQuestionPrompt)
+              generateWordPrompt)
         ],
         role: OpenAIChatMessageRole.user,
       ),
@@ -44,11 +44,11 @@ class Data {
 
     final rawQuestionMessage = response.choices.first.message;
 
-    return Question.fromOpenAIMessage(rawQuestionMessage);
+    return models.Word.fromOpenAIMessage(rawQuestionMessage);
   }
 
-  Future<Hint> requestHint(Question question) async {
-    final prompt = requestHintPrompt(question.description);
+  Future<models.Hint> requestHint(models.Word word) async {
+    final prompt = requestHintPrompt(word.word);
     _messages.add(OpenAIChatCompletionChoiceMessageModel(
       content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(prompt)],
       role: OpenAIChatMessageRole.user,
@@ -60,6 +60,6 @@ class Data {
 
     _messages.add(rawMessage);
 
-    return Hint.fromOpenAIMessage(rawMessage);
+    return models.Hint.fromOpenAIMessage(rawMessage);
   }
 }

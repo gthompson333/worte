@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../data/openai/models.dart';
 
 typedef AnswerSelectedCallback = void Function(
-  Question question,
+  Word question,
   String answerKey,
 );
 
@@ -13,7 +13,7 @@ class QuestionDetail extends StatelessWidget {
     required this.onAnswerSelected,
   });
 
-  final Question question;
+  final Word question;
   final AnswerSelectedCallback onAnswerSelected;
 
   @override

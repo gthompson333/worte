@@ -35,7 +35,7 @@ class _MainScreenState extends State<MainScreen> {
   OperationStatus fetchQuestionStatus = OperationStatus.loading;
   OperationStatus fetchHintStatus = OperationStatus.idle;
 
-  Question? currentQuestion;
+  Word? currentQuestion;
   Hint? hint;
 
   @override
