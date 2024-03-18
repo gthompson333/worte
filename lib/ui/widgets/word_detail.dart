@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../../data/openai/models.dart';
 
-typedef AnswerSelectedCallback = void Function(
-  Word question,
+typedef WordSelectedCallback = void Function(
+  Word word,
   String answerKey,
 );
 
-class QuestionDetail extends StatelessWidget {
-  const QuestionDetail({
+class WordDetail extends StatelessWidget {
+  const WordDetail({
     super.key,
-    required this.question,
-    required this.onAnswerSelected,
+    required this.word,
+    required this.onWordSelected,
   });
 
-  final Word question;
-  final AnswerSelectedCallback onAnswerSelected;
+  final Word word;
+  final WordSelectedCallback onWordSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class QuestionDetail extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          question.word,
+          word.word,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
@@ -40,10 +40,10 @@ class QuestionDetail extends StatelessWidget {
           crossAxisCount: 2,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          children: question.translations.entries
+          children: word.translations.entries
               .map(
                 (entry) => OutlinedButton(
-                  onPressed: () => onAnswerSelected.call(question, entry.key),
+                  onPressed: () => onWordSelected.call(word, entry.key),
                   child: Text(
                     entry.key,
                     textAlign: TextAlign.center,

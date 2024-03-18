@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:worter/ui/features/login/signin_cubit.dart';
-import 'main_screen.dart';
+import '../main/main_screen.dart';
 
-class MainScreenView extends StatefulWidget {
-  const MainScreenView({super.key});
+class SignInView extends StatefulWidget {
+  const SignInView({super.key});
 
   @override
-  State<MainScreenView> createState() => _MainScreenViewState();
+  State<SignInView> createState() => _SignInViewState();
 }
 
-class _MainScreenViewState extends State<MainScreenView> {
+class _SignInViewState extends State<SignInView> {
   bool userNameValid = false;
 
   @override
@@ -41,7 +41,8 @@ class _MainScreenViewState extends State<MainScreenView> {
                 return ElevatedButton(
                   onPressed: userNameValid
                       ? () => {
-                            Navigator.push(context, MainScreen.route('')),
+                            Navigator.push(
+                                context, MainScreen.route(state.userName)),
                           }
                       : null,
                   child: const Text('Lass Uns Gehen!'),

@@ -7,7 +7,7 @@ import '../../widgets/error_view.dart';
 import '../../widgets/game_over.dart';
 import '../../widgets/hud.dart';
 import '../../widgets/loading_view.dart';
-import '../../widgets/question_detail.dart';
+import '../../widgets/word_detail.dart';
 
 class MainScreen extends StatefulWidget {
   final String player;
@@ -20,7 +20,7 @@ class MainScreen extends StatefulWidget {
   @override
   State<MainScreen> createState() => _MainScreenState();
 
-  /// Route creation helper
+  // Route creation helper
   static Route route(String player) {
     return MaterialPageRoute<void>(
       builder: (_) => MainScreen(
@@ -42,34 +42,20 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      fetchQuestion();
+      fetchWord();
     });
     super.initState();
   }
 
-  void fetchQuestion() {
+  void fetchWord() {
     setState(() {
       hint = null;
       fetchHintStatus = OperationStatus.idle;
     });
-    context.read<TranslateWordBloc>().add(GetWordEvent());
-
-    /*Data.instance
-        .generateWord()
-        .then(
-          (question) => setState(() {
-            currentQuestion = question;
-            fetchQuestionStatus = OperationStatus.success;
-          }),
-        )
-        .onError(
-          (error, stackTrace) => setState(() {
-            fetchQuestionStatus = OperationStatus.failed;
-          }),
-        );*/
+    context.read<TranslateWordBloc>().add(const GetWordEvent());
   }
 
-  void resetGame() {
+  void resetScreen() {
     setState(() {
       points = 0;
       availableHints = 3;
@@ -78,15 +64,15 @@ class _MainScreenState extends State<MainScreen> {
       hint = null;
       fetchHintStatus = OperationStatus.idle;
     });
-    fetchQuestion();
+    fetchWord();
   }
 
-  Widget buildGameView() {
-    return BlocBuilder(builder: (context, state) {
+  Widget buildMainScreen() {
+    return BlocBuilder<TranslateWordBloc, TranslateState>(
+        builder: (context, state) {
       if (state is TranslateWordLoaded) {
         currentQuestion = state.word;
       }
-      ;
 
       if (isGameOver) {
         return GameOver(
@@ -94,7 +80,7 @@ class _MainScreenState extends State<MainScreen> {
           correctAnswer: currentQuestion!.correctWord.key,
           funFact: "[No fact provided.]",
           onTryAgainPressed: () {
-            resetGame();
+            resetScreen();
           },
           onGoBackPressed: () {
             Navigator.pop(context);
@@ -111,7 +97,7 @@ class _MainScreenState extends State<MainScreen> {
       if (state is TranslateWordError) {
         return Center(
           child: ErrorView(
-            onRetryPressed: () => fetchQuestion(),
+            onRetryPressed: () => fetchWord(),
           ),
         );
       }
@@ -130,14 +116,14 @@ class _MainScreenState extends State<MainScreen> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              QuestionDetail(
-                question: currentQuestion!,
-                onAnswerSelected: (question, answerKey) {
+              WordDetail(
+                word: currentQuestion!,
+                onWordSelected: (question, answerKey) {
                   if (question.translations[answerKey] ?? false) {
                     setState(() {
                       ++points;
                     });
-                    fetchQuestion();
+                    fetchWord();
                   } else {
                     setState(() {
                       isGameOver = true;
@@ -228,10 +214,7 @@ class _MainScreenState extends State<MainScreen> {
             vertical: 16.0,
             horizontal: 24,
           ),
-          child: BlocProvider(
-            create: (context) => TranslateWordBloc(),
-            child: buildGameView(),
-          ),
+          child: buildMainScreen(),
         ),
       ),
     );

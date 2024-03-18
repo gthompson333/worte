@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:worter/ui/features/login/signin_cubit.dart';
-import '../main/main_screen_view.dart';
+import 'sign_in_view.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(
+          padding: EdgeInsets.symmetric(
             vertical: 16.0,
             horizontal: 24,
           ),
-          child: BlocProvider(
-            create: (context) => SignInCubit(),
-            child: MainScreenView(),
-          ),
+          child: SignInView(),
         ),
       ),
     );
