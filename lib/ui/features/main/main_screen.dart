@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:worter/ui/features/main/translate_bloc.dart';
 import '../../../data/openai/services.dart';
 import '../../../data/openai/models.dart';
 import '../../widgets/error_view.dart';
@@ -32,7 +34,6 @@ class _MainScreenState extends State<MainScreen> {
   int points = 0;
   int availableHints = 3;
   bool isGameOver = false;
-  OperationStatus fetchQuestionStatus = OperationStatus.loading;
   OperationStatus fetchHintStatus = OperationStatus.idle;
 
   Word? currentQuestion;
@@ -48,11 +49,12 @@ class _MainScreenState extends State<MainScreen> {
 
   void fetchQuestion() {
     setState(() {
-      fetchQuestionStatus = OperationStatus.loading;
       hint = null;
       fetchHintStatus = OperationStatus.idle;
     });
-    Data.instance
+    context.read<TranslateWordBloc>().add(GetWordEvent());
+
+    /*Data.instance
         .generateWord()
         .then(
           (question) => setState(() {
@@ -64,7 +66,7 @@ class _MainScreenState extends State<MainScreen> {
           (error, stackTrace) => setState(() {
             fetchQuestionStatus = OperationStatus.failed;
           }),
-        );
+        );*/
   }
 
   void resetGame() {
@@ -72,7 +74,6 @@ class _MainScreenState extends State<MainScreen> {
       points = 0;
       availableHints = 3;
       isGameOver = false;
-      fetchQuestionStatus = OperationStatus.loading;
       currentQuestion = null;
       hint = null;
       fetchHintStatus = OperationStatus.idle;
@@ -81,68 +82,75 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget buildGameView() {
-    if (isGameOver) {
-      return GameOver(
-        score: points,
-        correctAnswer: currentQuestion!.correctWord.key,
-        funFact: "[No fact provided.]",
-        onTryAgainPressed: () {
-          resetGame();
-        },
-        onGoBackPressed: () {
-          Navigator.pop(context);
-        },
-      );
-    }
+    return BlocBuilder(builder: (context, state) {
+      if (state is TranslateWordLoaded) {
+        currentQuestion = state.word;
+      }
+      ;
 
-    if (fetchQuestionStatus.isLoading) {
-      return const Center(
-        child: LoadingView(),
-      );
-    }
+      if (isGameOver) {
+        return GameOver(
+          score: points,
+          correctAnswer: currentQuestion!.correctWord.key,
+          funFact: "[No fact provided.]",
+          onTryAgainPressed: () {
+            resetGame();
+          },
+          onGoBackPressed: () {
+            Navigator.pop(context);
+          },
+        );
+      }
 
-    if (fetchQuestionStatus.isFailed) {
-      return Center(
-        child: ErrorView(
-          onRetryPressed: () => fetchQuestion(),
-        ),
-      );
-    }
+      if (state is TranslateWordLoading) {
+        return const Center(
+          child: LoadingView(),
+        );
+      }
 
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Align(
-          alignment: Alignment.topLeft,
-          child: HUD(
-            playerName: widget.player,
-            score: points,
-            availableHints: availableHints,
+      if (state is TranslateWordError) {
+        return Center(
+          child: ErrorView(
+            onRetryPressed: () => fetchQuestion(),
           ),
-        ),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            QuestionDetail(
-              question: currentQuestion!,
-              onAnswerSelected: (question, answerKey) {
-                if (question.translations[answerKey] ?? false) {
-                  setState(() {
-                    ++points;
-                  });
-                  fetchQuestion();
-                } else {
-                  setState(() {
-                    isGameOver = true;
-                  });
-                }
-              },
+        );
+      }
+
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: HUD(
+              playerName: widget.player,
+              score: points,
+              availableHints: availableHints,
             ),
-            buildHintView(),
-          ],
-        ),
-      ],
-    );
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              QuestionDetail(
+                question: currentQuestion!,
+                onAnswerSelected: (question, answerKey) {
+                  if (question.translations[answerKey] ?? false) {
+                    setState(() {
+                      ++points;
+                    });
+                    fetchQuestion();
+                  } else {
+                    setState(() {
+                      isGameOver = true;
+                    });
+                  }
+                },
+              ),
+              buildHintView(),
+            ],
+          ),
+        ],
+      );
+    });
   }
 
   void fetchHint() {
@@ -220,7 +228,10 @@ class _MainScreenState extends State<MainScreen> {
             vertical: 16.0,
             horizontal: 24,
           ),
-          child: buildGameView(),
+          child: BlocProvider(
+            create: (context) => TranslateWordBloc(),
+            child: buildGameView(),
+          ),
         ),
       ),
     );

@@ -15,9 +15,9 @@ class SignInScreen extends StatelessWidget {
             vertical: 16.0,
             horizontal: 24,
           ),
-          child: BlocProvider<SignInCubit>(
-            create: (_) => SignInCubit(),
-            child: const MainScreenView(),
+          child: BlocProvider(
+            create: (context) => SignInCubit(),
+            child: MainScreenView(),
           ),
         ),
       ),
