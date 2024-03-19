@@ -5,14 +5,12 @@ class GameOver extends StatelessWidget {
     super.key,
     required this.score,
     required this.correctAnswer,
-    required this.funFact,
     this.onTryAgainPressed,
     this.onGoBackPressed,
   });
 
   final int score;
   final String correctAnswer;
-  final String funFact;
   final VoidCallback? onTryAgainPressed;
   final VoidCallback? onGoBackPressed;
 
@@ -39,10 +37,6 @@ class GameOver extends StatelessWidget {
             '$correctAnswer',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
-          ),
-          Text(
-            funFact,
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           ElevatedButton(

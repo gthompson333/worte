@@ -1,22 +1,34 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:worter/data/openai/models.dart';
-import 'package:worter/data/openai/services.dart';
+import '../../../data/openai/models.dart';
+import '../../../data/openai/services.dart';
 
 part 'translate_event.dart';
-
 part 'translate_state.dart';
 
 class TranslateWordBloc extends Bloc<TranslateEvent, TranslateState> {
-  TranslateWordBloc() : super(TranslateWordLoading()) {
+  TranslateWordBloc() : super(TranslateSessionStarted()) {
+    on<StartTranslateSession>(_onStartTranslateSession);
+    on<EndTranslateSession>(_onEndTranslateSession);
     on<GetWordEvent>(_onGetWord);
     on<GetHintEvent>(_onGetHint);
   }
 
+  Future<void> _onStartTranslateSession(
+      StartTranslateSession _, Emitter<TranslateState> emit) async {
+    emit(TranslateSessionStarted());
+  }
+
+  Future<void> _onEndTranslateSession(
+      EndTranslateSession _, Emitter<TranslateState> emit) async {
+    emit(TranslateSessionEnded());
+  }
+
   Future<void> _onGetWord(
-    GetWordEvent event,
+    GetWordEvent _,
     Emitter<TranslateState> emit,
   ) async {
+    emit(TranslateWordLoading());
     await Data.instance
         .generateWord()
         .then(
@@ -29,6 +41,7 @@ class TranslateWordBloc extends Bloc<TranslateEvent, TranslateState> {
     GetHintEvent event,
     Emitter<TranslateState> emit,
   ) async {
+    emit(TranslateHintLoading());
     await Data.instance
         .requestHint(event.word)
         .then(

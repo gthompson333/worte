@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:worter/ui/features/login/signin_cubit.dart';
+import 'signin_cubit.dart';
 import '../main/main_screen.dart';
 
 class SignInView extends StatefulWidget {
