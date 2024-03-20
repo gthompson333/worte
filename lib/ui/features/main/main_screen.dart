@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'translate_bloc.dart';
+import 'word_bloc.dart';
+import 'hint_bloc.dart';
 import '../../../data/openai/models.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/game_over.dart';
@@ -36,39 +37,27 @@ class _MainScreenState extends State<MainScreen> {
   // Only 3 hints allowed.
   int hintsRemaining = 3;
 
+  // The current word that is being translated.
   Word? currentWord;
-  Hint? currentHint;
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      getWord();
+      context.read<WordBloc>().add(const GetWordEvent());
     });
     super.initState();
   }
 
-  void getWord() {
-    currentWord = null;
-    context.read<TranslateWordBloc>().add(const GetWordEvent());
-  }
-
   void getHint() {
     if (hintsRemaining == 0) return;
-
-    currentHint = null;
-    context.read<TranslateWordBloc>().add(GetHintEvent(word: currentWord!));
+    context.read<HintBloc>().add(GetHintEvent(word: currentWord!));
   }
 
   void restartTranslateSession() {
-    context.read<TranslateWordBloc>().add(const StartTranslateSession());
-
-    setState(() {
-      points = 0;
-      hintsRemaining = 3;
-      currentWord = null;
-      currentHint = null;
-    });
-    getWord();
+    context.read<WordBloc>().add(const StartWordSession());
+    points = 0;
+    hintsRemaining = 3;
+    context.read<WordBloc>().add(const GetWordEvent());
   }
 
   @override
@@ -80,16 +69,23 @@ class _MainScreenState extends State<MainScreen> {
             vertical: 16.0,
             horizontal: 24,
           ),
-          child: buildWordWidget(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              wordWidget(),
+              hintWidget(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget buildWordWidget() {
-    return BlocBuilder<TranslateWordBloc, TranslateState>(
+  Widget wordWidget() {
+    return BlocBuilder<WordBloc, WordState>(
         builder: (context, state) {
-      if (state is TranslateSessionEnded) {
+
+      if (state is WordSessionEnded) {
         return GameOver(
           score: points,
           correctAnswer: currentWord!.correctWord.key,
@@ -102,25 +98,25 @@ class _MainScreenState extends State<MainScreen> {
         );
       }
 
-      if (state is TranslateWordLoading) {
+      if (state is WordLoading) {
         return const Center(
           child: LoadingView(),
         );
       }
 
-      if (state is TranslateWordError) {
+      if (state is WordError) {
         return Center(
           child: ErrorView(
-            onRetryPressed: () => getWord(),
+            onRetryPressed: () =>
+                context.read<WordBloc>().add(const GetWordEvent()),
           ),
         );
       }
 
-      if (state is TranslateWordLoaded) {
+      if (state is WordLoaded) {
         currentWord = state.word;
 
-        return Stack(
-          alignment: Alignment.center,
+        return Column(
           children: [
             Align(
               alignment: Alignment.topLeft,
@@ -130,26 +126,21 @@ class _MainScreenState extends State<MainScreen> {
                 availableHints: hintsRemaining,
               ),
             ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                WordDetail(
-                  word: currentWord!,
-                  onWordSelected: (question, answerKey) {
-                    if (question.translations[answerKey] ?? false) {
-                      setState(() {
-                        ++points;
-                      });
-                      getWord();
-                    } else {
-                      context
-                          .read<TranslateWordBloc>()
-                          .add(const EndTranslateSession());
-                    }
-                  },
-                ),
-                buildHintWidget(state),
-              ],
+            const SizedBox(
+              height: 80,
+            ),
+            WordDetail(
+              word: currentWord!,
+              onWordSelected: (question, answerKey) {
+                if (question.translations[answerKey] ?? false) {
+                  ++points;
+                  context.read<WordBloc>().add(const GetWordEvent());
+                } else {
+                  context
+                      .read<WordBloc>()
+                      .add(const EndWordSession());
+                }
+              },
             ),
           ],
         );
@@ -158,52 +149,51 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  Widget buildHintWidget(TranslateState state) {
-    if (hintsRemaining == 0) return const SizedBox();
+  Widget hintWidget() {
+    return BlocBuilder<HintBloc, HintState>(
+        builder: (context, state) {
+      if (hintsRemaining == 0) return const SizedBox();
 
-    print("Translate State: ${state.runtimeType}");
+      if (state is HintLoading) {
+        return const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 24),
+            CircularProgressIndicator(),
+          ],
+        );
+      }
 
-    if (state is TranslateHintLoading) {
-      return const Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(height: 24),
-          CircularProgressIndicator(),
-        ],
-      );
-    }
+      if (state is HintLoaded) {
+        hintsRemaining -= 1;
 
-    if (state is TranslateHintLoaded) {
-      currentHint = state.hint;
-      hintsRemaining -= 1;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 24),
+            Text(
+              state.hint.hint,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        );
+      }
 
-      print("Translate Hint Loaded");
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 24),
-          Text(
-            currentHint!.hint,
-            textAlign: TextAlign.center,
-          ),
+          TextButton(
+            onPressed: hintsRemaining > 0 ? getHint : null,
+            child: const Text(
+              'Kann ich einen Hinweis haben, bitte?',
+              style: TextStyle(
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          )
         ],
       );
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: 24),
-        TextButton(
-          onPressed: hintsRemaining > 0 ? getHint : null,
-          child: const Text(
-            'Kann ich einen Hinweis haben, bitte?',
-            style: TextStyle(
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        )
-      ],
-    );
+    });
   }
 }

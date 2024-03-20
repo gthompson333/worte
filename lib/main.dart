@@ -2,7 +2,8 @@ import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:worter/ui/features/login/signin_cubit.dart';
-import 'package:worter/ui/features/main/translate_bloc.dart';
+import 'package:worter/ui/features/main/word_bloc.dart';
+import 'package:worter/ui/features/main/hint_bloc.dart';
 import 'bloc_monitoring.dart';
 import 'ui/features/login/signin_screen.dart';
 
@@ -23,11 +24,14 @@ class WorterApp extends StatelessWidget {
           create: (_) => SignInCubit(),
         ),
         BlocProvider(
-          create: (_) => TranslateWordBloc()..add(const GetWordEvent()),
+          create: (_) => WordBloc(),
+        ),
+        BlocProvider(
+          create: (_) => HintBloc(),
         ),
       ],
       child: MaterialApp(
-        title: 'Worter',
+        title: 'Deutsch',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             brightness: Brightness.dark,
