@@ -34,9 +34,8 @@ class _MainScreenState extends State<MainScreen> {
   int points = 0;
 
   // Only 3 hints allowed.
-  int availableHints = 3;
+  int hintsRemaining = 3;
 
-  bool isGameOver = false;
   Word? currentWord;
   Hint? currentHint;
 
@@ -54,27 +53,43 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void getHint() {
-    if (availableHints == 0) return;
+    if (hintsRemaining == 0) return;
 
     currentHint = null;
     context.read<TranslateWordBloc>().add(GetHintEvent(word: currentWord!));
   }
 
   void restartTranslateSession() {
+    context.read<TranslateWordBloc>().add(const StartTranslateSession());
+
     setState(() {
       points = 0;
-      availableHints = 3;
-      isGameOver = false;
+      hintsRemaining = 3;
       currentWord = null;
       currentHint = null;
     });
     getWord();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: 16.0,
+            horizontal: 24,
+          ),
+          child: buildWordWidget(),
+        ),
+      ),
+    );
+  }
+
   Widget buildWordWidget() {
     return BlocBuilder<TranslateWordBloc, TranslateState>(
         builder: (context, state) {
-      if (isGameOver) {
+      if (state is TranslateSessionEnded) {
         return GameOver(
           score: points,
           correctAnswer: currentWord!.correctWord.key,
@@ -112,7 +127,7 @@ class _MainScreenState extends State<MainScreen> {
               child: HUD(
                 playerName: widget.player,
                 score: points,
-                availableHints: availableHints,
+                availableHints: hintsRemaining,
               ),
             ),
             Column(
@@ -127,13 +142,13 @@ class _MainScreenState extends State<MainScreen> {
                       });
                       getWord();
                     } else {
-                      setState(() {
-                        isGameOver = true;
-                      });
+                      context
+                          .read<TranslateWordBloc>()
+                          .add(const EndTranslateSession());
                     }
                   },
                 ),
-                buildHintWidget(),
+                buildHintWidget(state),
               ],
             ),
           ],
@@ -143,71 +158,52 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  Widget buildHintWidget() {
-    return BlocBuilder<TranslateWordBloc, TranslateState>(
-        builder: (context, state) {
-      if (availableHints == 0) return const SizedBox();
+  Widget buildHintWidget(TranslateState state) {
+    if (hintsRemaining == 0) return const SizedBox();
 
-      if (state is TranslateHintLoading) {
-        return const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 24),
-            CircularProgressIndicator(),
-          ],
-        );
-      }
+    print("Translate State: ${state.runtimeType}");
 
-      if (state is TranslateHintError) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 24),
-            TextButton(
-              onPressed: availableHints > 0 ? getHint : null,
-              child: Text(
-                'Not sure? Give me a hint! 🙏🏼',
-                style: TextStyle(
-                  decoration: TextDecoration.underline,
-                  decorationColor: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            )
-          ],
-        );
-      }
+    if (state is TranslateHintLoading) {
+      return const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: 24),
+          CircularProgressIndicator(),
+        ],
+      );
+    }
 
-      if (state is TranslateHintLoaded) {
-        currentHint = state.hint;
-        availableHints -= 1;
+    if (state is TranslateHintLoaded) {
+      currentHint = state.hint;
+      hintsRemaining -= 1;
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 24),
-            Text(
-              currentHint!.hint,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        );
-      }
-      return const SizedBox();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 16.0,
-            horizontal: 24,
+      print("Translate Hint Loaded");
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 24),
+          Text(
+            currentHint!.hint,
+            textAlign: TextAlign.center,
           ),
-          child: buildWordWidget(),
-        ),
-      ),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 24),
+        TextButton(
+          onPressed: hintsRemaining > 0 ? getHint : null,
+          child: const Text(
+            'Kann ich einen Hinweis haben, bitte?',
+            style: TextStyle(
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        )
+      ],
     );
   }
 }

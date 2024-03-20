@@ -28,13 +28,11 @@ class WorterApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Worter',
-        debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
             brightness: Brightness.dark,
-            seedColor: const Color(0xff3A37D2),
-            onBackground: Colors.white,
+            seedColor: Colors.yellow,
+            background: Colors.black,
           ),
         ),
         home: const SignInScreen(),

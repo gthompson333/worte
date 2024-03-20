@@ -22,12 +22,6 @@ class WordDetail extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          "[No topic provided.]",
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.labelSmall,
-        ),
-        const SizedBox(height: 4),
-        Text(
           word.word,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall,
