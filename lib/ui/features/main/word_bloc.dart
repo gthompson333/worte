@@ -7,20 +7,20 @@ part 'word_event.dart';
 part 'word_state.dart';
 
 class WordBloc extends Bloc<WordEvent, WordState> {
-  WordBloc() : super(WordSessionStarted()) {
-    on<StartWordSession>(_onStartWordSession);
-    on<EndWordSession>(_onEndWordSession);
+  WordBloc() : super(WordStarted()) {
+    on<StartWordEvent>(_onStarWord);
+    on<EndWordEvent>(_onEndWord);
     on<GetWordEvent>(_onGetWord);
   }
 
-  Future<void> _onStartWordSession(StartWordSession _,
+  Future<void> _onStarWord(StartWordEvent _,
       Emitter<WordState> emit) async {
-    emit(WordSessionStarted());
+    emit(WordStarted());
   }
 
-  Future<void> _onEndWordSession(EndWordSession _,
+  Future<void> _onEndWord(EndWordEvent _,
       Emitter<WordState> emit) async {
-    emit(WordSessionEnded());
+    emit(WordEnded());
   }
 
   Future<void> _onGetWord(GetWordEvent _,

@@ -4,12 +4,12 @@ abstract class WordEvent {
   const WordEvent();
 }
 
-class StartWordSession extends WordEvent {
-  const StartWordSession();
+class StartWordEvent extends WordEvent {
+  const StartWordEvent();
 }
 
-class EndWordSession extends WordEvent {
-  const EndWordSession();
+class EndWordEvent extends WordEvent {
+  const EndWordEvent();
 }
 
 class GetWordEvent extends WordEvent {

@@ -54,7 +54,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void restartTranslateSession() {
-    context.read<WordBloc>().add(const StartWordSession());
+    context.read<WordBloc>().add(const StartWordEvent());
     points = 0;
     hintsRemaining = 3;
     context.read<WordBloc>().add(const GetWordEvent());
@@ -82,10 +82,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget wordWidget() {
-    return BlocBuilder<WordBloc, WordState>(
-        builder: (context, state) {
-
-      if (state is WordSessionEnded) {
+    return BlocBuilder<WordBloc, WordState>(builder: (context, state) {
+      if (state is WordEnded) {
         return GameOver(
           score: points,
           correctAnswer: currentWord!.correctWord.key,
@@ -114,6 +112,7 @@ class _MainScreenState extends State<MainScreen> {
       }
 
       if (state is WordLoaded) {
+        context.read<HintBloc>().add(const InitializeHintEvent());
         currentWord = state.word;
 
         return Column(
@@ -136,9 +135,7 @@ class _MainScreenState extends State<MainScreen> {
                   ++points;
                   context.read<WordBloc>().add(const GetWordEvent());
                 } else {
-                  context
-                      .read<WordBloc>()
-                      .add(const EndWordSession());
+                  context.read<WordBloc>().add(const EndWordEvent());
                 }
               },
             ),
@@ -150,8 +147,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget hintWidget() {
-    return BlocBuilder<HintBloc, HintState>(
-        builder: (context, state) {
+    return BlocBuilder<HintBloc, HintState>(builder: (context, state) {
       if (hintsRemaining == 0) return const SizedBox();
 
       if (state is HintLoading) {
@@ -179,21 +175,24 @@ class _MainScreenState extends State<MainScreen> {
         );
       }
 
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 24),
-          TextButton(
-            onPressed: hintsRemaining > 0 ? getHint : null,
-            child: const Text(
-              'Kann ich einen Hinweis haben, bitte?',
-              style: TextStyle(
-                decoration: TextDecoration.underline,
+      if (state is HintInitial) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 24),
+            TextButton(
+              onPressed: hintsRemaining > 0 ? getHint : null,
+              child: const Text(
+                'Kann ich einen Hinweis haben, bitte?',
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                ),
               ),
-            ),
-          )
-        ],
-      );
+            )
+          ],
+        );
+      }
+      return const SizedBox();
     });
   }
 }

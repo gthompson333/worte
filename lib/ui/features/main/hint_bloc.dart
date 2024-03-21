@@ -9,7 +9,15 @@ part 'hint_state.dart';
 
 class HintBloc extends Bloc<HintEvent, HintState> {
   HintBloc() : super(HintInitial()) {
+    on<InitializeHintEvent>(_onInitializeHint);
     on<GetHintEvent>(_onGetHint);
+  }
+
+  Future<void> _onInitializeHint(
+    InitializeHintEvent event,
+    Emitter<HintState> emit,
+  ) async {
+    emit(HintInitial());
   }
 
   Future<void> _onGetHint(
