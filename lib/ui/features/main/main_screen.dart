@@ -83,66 +83,62 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget wordWidget() {
     return BlocBuilder<WordBloc, WordState>(builder: (context, state) {
-      if (state is WordEnded) {
-        return GameOver(
-          score: points,
-          correctAnswer: currentWord!.correctWord.key,
-          onTryAgainPressed: () {
-            restartTranslateSession();
-          },
-          onGoBackPressed: () {
-            Navigator.pop(context);
-          },
-        );
-      }
+      switch (state) {
+        case WordEnded():
+          return GameOver(
+            score: points,
+            correctAnswer: currentWord!.correctWord.key,
+            onTryAgainPressed: () {
+              restartTranslateSession();
+            },
+            onGoBackPressed: () {
+              Navigator.pop(context);
+            },
+          );
+        case WordLoading():
+          return const Center(
+            child: LoadingView(),
+          );
+        case WordLoaded():
+          context.read<HintBloc>().add(const InitializeHintEvent());
+          currentWord = state.word;
 
-      if (state is WordLoading) {
-        return const Center(
-          child: LoadingView(),
-        );
-      }
-
-      if (state is WordError) {
-        return Center(
-          child: ErrorView(
-            onRetryPressed: () =>
-                context.read<WordBloc>().add(const GetWordEvent()),
-          ),
-        );
-      }
-
-      if (state is WordLoaded) {
-        context.read<HintBloc>().add(const InitializeHintEvent());
-        currentWord = state.word;
-
-        return Column(
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: HUD(
-                playerName: widget.player,
-                score: points,
-                availableHints: hintsRemaining,
+          return Column(
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: HUD(
+                  playerName: widget.player,
+                  score: points,
+                  availableHints: hintsRemaining,
+                ),
               ),
+              const SizedBox(
+                height: 80,
+              ),
+              WordDetail(
+                word: currentWord!,
+                onWordSelected: (question, answerKey) {
+                  if (question.translations[answerKey] ?? false) {
+                    ++points;
+                    context.read<WordBloc>().add(const GetWordEvent());
+                  } else {
+                    context.read<WordBloc>().add(const EndWordEvent());
+                  }
+                },
+              ),
+            ],
+          );
+        case WordError():
+          return Center(
+            child: ErrorView(
+              onRetryPressed: () =>
+                  context.read<WordBloc>().add(const GetWordEvent()),
             ),
-            const SizedBox(
-              height: 80,
-            ),
-            WordDetail(
-              word: currentWord!,
-              onWordSelected: (question, answerKey) {
-                if (question.translations[answerKey] ?? false) {
-                  ++points;
-                  context.read<WordBloc>().add(const GetWordEvent());
-                } else {
-                  context.read<WordBloc>().add(const EndWordEvent());
-                }
-              },
-            ),
-          ],
-        );
+          );
+        default:
+          return const SizedBox();
       }
-      return const SizedBox();
     });
   }
 
@@ -150,49 +146,48 @@ class _MainScreenState extends State<MainScreen> {
     return BlocBuilder<HintBloc, HintState>(builder: (context, state) {
       if (hintsRemaining == 0) return const SizedBox();
 
-      if (state is HintLoading) {
-        return const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 24),
-            CircularProgressIndicator(),
-          ],
-        );
-      }
-
-      if (state is HintLoaded) {
-        hintsRemaining -= 1;
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 24),
-            Text(
-              state.hint.hint,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        );
-      }
-
-      if (state is HintInitial) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 24),
-            TextButton(
-              onPressed: hintsRemaining > 0 ? getHint : null,
-              child: const Text(
-                'Kann ich einen Hinweis haben, bitte?',
-                style: TextStyle(
-                  decoration: TextDecoration.underline,
+      switch (state) {
+        case HintInitial():
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: hintsRemaining > 0 ? getHint : null,
+                child: const Text(
+                  'Hinweis',
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
+              )
+            ],
+          );
+        case HintLoading():
+          return const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 24),
+              CircularProgressIndicator(),
+            ],
+          );
+        case HintLoaded():
+          hintsRemaining -= 1;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 24),
+              Text(
+                state.hint.hint,
+                textAlign: TextAlign.center,
               ),
-            )
-          ],
-        );
+            ],
+          );
+        case HintError():
+        default:
+          return const SizedBox();
       }
-      return const SizedBox();
     });
   }
 }

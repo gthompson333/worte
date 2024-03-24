@@ -8,9 +8,8 @@ class LoadingView extends StatelessWidget {
     return const Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        SizedBox(height: 20),
         CircularProgressIndicator(),
-        SizedBox(height: 16),
-        Text('Pulling a word out of the 🪄🎩 '),
       ],
     );
   }
