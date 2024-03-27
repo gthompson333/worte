@@ -4,10 +4,6 @@ abstract class WordEvent {
   const WordEvent();
 }
 
-class StartWordEvent extends WordEvent {
-  const StartWordEvent();
-}
-
 class EndWordEvent extends WordEvent {
   const EndWordEvent();
 }

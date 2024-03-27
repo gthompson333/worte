@@ -7,7 +7,14 @@ abstract class HintState extends Equatable {
   List<Object> get props => [];
 }
 
-final class HintInitial extends HintState {}
+final class HintShouldShow extends HintState {
+  const HintShouldShow({required this.shouldShowHint});
+  final bool shouldShowHint;
+
+  @override
+  List<Object> get props => [shouldShowHint];
+}
+
 final class HintLoading extends HintState {}
 
 final class HintLoaded extends HintState {

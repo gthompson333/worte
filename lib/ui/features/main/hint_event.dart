@@ -4,8 +4,9 @@ abstract class HintEvent {
   const HintEvent();
 }
 
-class InitializeHintEvent extends HintEvent {
-  const InitializeHintEvent();
+class ShowHintLinkEvent extends HintEvent {
+  const ShowHintLinkEvent({required this.showHintLink});
+  final bool showHintLink;
 }
 
 class GetHintEvent extends HintEvent {

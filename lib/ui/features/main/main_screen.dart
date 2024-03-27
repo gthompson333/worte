@@ -43,6 +43,10 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      // Remove the hint link until the word has arrived.
+      context.read<HintBloc>().add(const ShowHintLinkEvent(showHintLink: false));
+
+      // Fetch the first word for translation.
       context.read<WordBloc>().add(const GetWordEvent());
     });
     super.initState();
@@ -54,7 +58,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void restartTranslateSession() {
-    context.read<WordBloc>().add(const StartWordEvent());
     points = 0;
     hintsRemaining = 3;
     context.read<WordBloc>().add(const GetWordEvent());
@@ -100,7 +103,7 @@ class _MainScreenState extends State<MainScreen> {
             child: LoadingView(),
           );
         case WordLoaded():
-          context.read<HintBloc>().add(const InitializeHintEvent());
+          context.read<HintBloc>().add(const ShowHintLinkEvent(showHintLink: true));
           currentWord = state.word;
 
           return Column(
@@ -119,6 +122,7 @@ class _MainScreenState extends State<MainScreen> {
               WordDetail(
                 word: currentWord!,
                 onWordSelected: (question, answerKey) {
+                  context.read<HintBloc>().add(const ShowHintLinkEvent(showHintLink: false));
                   if (question.translations[answerKey] ?? false) {
                     ++points;
                     context.read<WordBloc>().add(const GetWordEvent());
@@ -136,9 +140,8 @@ class _MainScreenState extends State<MainScreen> {
                   context.read<WordBloc>().add(const GetWordEvent()),
             ),
           );
-        default:
-          return const SizedBox();
       }
+      return const SizedBox();
     });
   }
 
@@ -147,7 +150,11 @@ class _MainScreenState extends State<MainScreen> {
       if (hintsRemaining == 0) return const SizedBox();
 
       switch (state) {
-        case HintInitial():
+        case HintShouldShow():
+          if (!state.shouldShowHint) {
+            return const SizedBox();
+          }
+
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -185,9 +192,9 @@ class _MainScreenState extends State<MainScreen> {
             ],
           );
         case HintError():
-        default:
           return const SizedBox();
       }
+      return const SizedBox();
     });
   }
 }

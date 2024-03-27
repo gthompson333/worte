@@ -8,16 +8,16 @@ part 'hint_event.dart';
 part 'hint_state.dart';
 
 class HintBloc extends Bloc<HintEvent, HintState> {
-  HintBloc() : super(HintInitial()) {
-    on<InitializeHintEvent>(_onInitializeHint);
+  HintBloc() : super(const HintShouldShow(shouldShowHint: false)) {
+    on<ShowHintLinkEvent>(_onShouldShowHint);
     on<GetHintEvent>(_onGetHint);
   }
 
-  Future<void> _onInitializeHint(
-    InitializeHintEvent event,
+  Future<void> _onShouldShowHint(
+    ShowHintLinkEvent event,
     Emitter<HintState> emit,
   ) async {
-    emit(HintInitial());
+    emit(HintShouldShow(shouldShowHint: event.showHintLink));
   }
 
   Future<void> _onGetHint(

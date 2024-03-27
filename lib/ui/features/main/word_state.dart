@@ -7,8 +7,6 @@ abstract class WordState extends Equatable {
   List<Object> get props => [];
 }
 
-final class WordStarted extends WordState {}
-
 final class WordEnded extends WordState {}
 
 final class WordLoading extends WordState {}
