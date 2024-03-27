@@ -44,7 +44,9 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       // Remove the hint link until the word has arrived.
-      context.read<HintBloc>().add(const ShowHintLinkEvent(showHintLink: false));
+      context
+          .read<HintBloc>()
+          .add(const ShowHintLinkEvent(showHintLink: false));
 
       // Fetch the first word for translation.
       context.read<WordBloc>().add(const GetWordEvent());
@@ -99,11 +101,11 @@ class _MainScreenState extends State<MainScreen> {
             },
           );
         case WordLoading():
-          return const Center(
-            child: LoadingView(),
-          );
+          return const LoadingView();
         case WordLoaded():
-          context.read<HintBloc>().add(const ShowHintLinkEvent(showHintLink: true));
+          context
+              .read<HintBloc>()
+              .add(const ShowHintLinkEvent(showHintLink: true));
           currentWord = state.word;
 
           return Column(
@@ -122,12 +124,29 @@ class _MainScreenState extends State<MainScreen> {
               WordDetail(
                 word: currentWord!,
                 onWordSelected: (question, answerKey) {
-                  context.read<HintBloc>().add(const ShowHintLinkEvent(showHintLink: false));
+                  context
+                      .read<HintBloc>()
+                      .add(const ShowHintLinkEvent(showHintLink: false));
                   if (question.translations[answerKey] ?? false) {
                     ++points;
-                    context.read<WordBloc>().add(const GetWordEvent());
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return bottomSheet('CORRECT', 'Next Word', () {
+                          Navigator.pop(context);
+                          context.read<WordBloc>().add(const GetWordEvent());
+                        });
+                      },
+                    );
                   } else {
-                    context.read<WordBloc>().add(const EndWordEvent());
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return bottomSheet('FAIL', 'Try Again', () {
+                          Navigator.pop(context);
+                        });
+                      },
+                    );
                   }
                 },
               ),
@@ -143,6 +162,23 @@ class _MainScreenState extends State<MainScreen> {
       }
       return const SizedBox();
     });
+  }
+
+  Widget bottomSheet(
+      String title, String buttonText, VoidCallback? buttonAction) {
+    return SizedBox(
+      height: 120,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(title),
+            ElevatedButton(onPressed: buttonAction, child: Text(buttonText)),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget hintWidget() {

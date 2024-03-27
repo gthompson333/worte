@@ -14,14 +14,13 @@ class ErrorView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Ehm! Sorry.',
+          'Fail!',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         const SizedBox(height: 16),
         const Text(
-          'Magic 🪄✨ ran out and we couldn\'t pull a word '
-          'out of the hat. Please try again later!',
+          'Unable to get a new word. Something done went wrong!',
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),

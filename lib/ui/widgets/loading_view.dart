@@ -5,12 +5,14 @@ class LoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(height: 20),
-        CircularProgressIndicator(),
-      ],
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: 300),
+          CircularProgressIndicator(),
+        ],
+      ),
     );
   }
 }
